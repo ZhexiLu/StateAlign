@@ -1,0 +1,4 @@
+{
+  "gorilla": {"url": "https://github.com/ShishirPatil/gorilla.git", "commit": "6ea57973c7a6097fd7c5915698c54c17c5b1b6c8",
+              "use": "BFCL v4 multi-turn (berkeley-function-call-leaderboard), patched with bfcl/bfcl.patch"}
+}

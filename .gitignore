@@ -1,0 +1,18 @@
+__pycache__/
+*.pyc
+*.egg-info/
+.ipynb_checkpoints/
+# fetched by third_party/fetch.sh
+third_party/gorilla/
+# runs, model weights and evaluation outputs are never committed
+runs/
+results/
+merged/
+models/
+wandb/
+*.safetensors
+*.bin
+*.pt
+*.jsonl
+!data/statealign_example_100.jsonl
+.env
