@@ -15,49 +15,6 @@ Keerthiram Murugesan<sup>2</sup>, Lei Yu<sup>1</sup>
 > training data, and the BFCL evaluation of StateAlign-8B. The full training set and the data construction pipeline
 > are not included at this time.
 
-## Overview
-
-A tool-use agent has to decide what to do next from the current task state: which information is available, what
-the listed tools can do, and how far the task has progressed. The right next action can be to execute a call, to ask
-the user for a missing value, to retrieve it with a tool, to decline an infeasible request, or to stop calling tools
-and answer.
-
-StateAlign trains this decision with reinforcement learning on constructed task states. The data cover five types of
-states (`EXEC`, `NEED_USER`, `NEED_FETCH`, `INFEASIBLE`, `STOP`), and a state is paired with a counterpart of the
-same task in which one condition differs, so that a different next action is required. Training uses two signals.
-
-**Outcome reward.** The policy acts in a short multi-step episode on each state. A question receives the stored user
-information, a retrieval call receives the recorded tool result, and the policy acts again on the updated history.
-For an episode $\tau$ that requires an execution,
-
-```math
-R_{\mathrm{out}}(\tau)=\gamma^{\,k-1}\,\alpha(\tau)\,c(\tau)
-```
-
-if the target calls are executed correctly, and 0 otherwise. Here $k$ is the step of the execution, $\gamma=0.8$,
-$\alpha(\tau)=0.5$ if the executing step carries extra calls and 1 otherwise, and $c(\tau)$ indicates that the step
-after the execution is also correct (1 when the state has no continuation). The rewards of the 8 rollouts sampled
-per state give the advantages of a GRPO objective $\mathcal J_{\mathrm{out}}$ with a KL term to the initial model.
-
-**State contrast.** The frozen initial model $\pi_0$ scores every generated token $y_t$ twice, once given the
-current state and its reference path $(h, z)$ and once given the paired state and its reference path
-$(\tilde h, \tilde z)$, with the same generated prefix $p_t$:
-
-```math
-r_t=\operatorname{clip}\bigl(\log\pi_0(y_t\mid h,z,p_t)-\log\pi_0(y_t\mid\tilde h,\tilde z,p_t),\,-1,\,1\bigr)
-```
-
-A positive score marks reasoning or action content that fits the current state, and a negative score marks content
-that fits the counterpart. The scores weight a token-level policy-gradient term $\mathcal J_{\mathrm{pair}}$, and the
-training objective is
-
-```math
-\mathcal J(\theta)=\mathcal J_{\mathrm{out}}(\theta)+\lambda\,\mathcal J_{\mathrm{pair}}(\theta),\qquad\lambda=0.1 .
-```
-
-The paired states and the reference paths are used for scoring only. The policy always acts from its tools and its
-interaction history.
-
 ## Repository layout
 
 ```
